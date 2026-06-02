@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .glass {
+    @apply bg-[#0A0F1E]/40 backdrop-blur-[30px] border border-white/10 rounded-2xl;
+  }
+  .glow-text {
+    text-shadow: 0 0 15px rgba(0, 242, 255, 0.7);
+  }
+}
+
+body {
+  margin: 0;
+  overflow-x: hidden;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(0, 242, 255, 0.3); border-radius: 10px; }
