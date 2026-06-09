@@ -1,17 +1,22 @@
 import React, { useState, useRef } from 'react';
 import { Routes, Route, Link, useLocation, NavLink } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
+import { HelmetProvider } from 'react-helmet-async';
 
 import Home from './pages/Home';
 import Solutions from './pages/Solutions';
 import Products from './pages/Products';
 import Technology from './pages/Technology';
 import Company from './pages/Company';
+import Contact from './pages/Contact';
+import NotFound from './pages/NotFound';
 import HealthcareSector from './pages/sectors/Healthcare';
 import ArchitectureSector from './pages/sectors/Architecture';
 import EdtechSector from './pages/sectors/Edtech';
 import LegaltechSector from './pages/sectors/Legaltech';
 import Background3D from './components/Background3D';
+import CustomCursor from './components/CustomCursor';
+import Preloader from './components/Preloader';
 
 const navLinkClass = ({ isActive }) =>
   `text-xs uppercase tracking-widest font-black transition-colors ${isActive ? 'text-cyanAccent' : 'text-gray-300 hover:text-white'}`;
@@ -61,12 +66,13 @@ function Header() {
           )}
         </div>
         <NavLink to="/products" className={navLinkClass}>Products</NavLink>
+        <NavLink to="/solutions" className={navLinkClass}>Solutions</NavLink>
         <NavLink to="/technology" className={navLinkClass}>Technology</NavLink>
         <NavLink to="/company" className={navLinkClass}>Company</NavLink>
       </nav>
 
       <div className="flex items-center gap-4">
-        <Link to="/company" className="hidden sm:inline-block px-4 py-2 md:px-5 md:py-3 bg-cyanAccent text-[#0A0F1E] font-black uppercase tracking-widest text-xs rounded hover:bg-white transition-colors shadow-[0_0_15px_rgba(0,242,255,0.3)]">
+        <Link to="/contact" className="hidden sm:inline-block px-4 py-2 md:px-5 md:py-3 bg-cyanAccent text-[#0A0F1E] font-black uppercase tracking-widest text-xs rounded hover:bg-white transition-colors shadow-[0_0_15px_rgba(0,242,255,0.3)]">
           Book a Demo
         </Link>
         {/* Hamburger */}
@@ -94,9 +100,10 @@ function Header() {
               ))}
             </div>
             <NavLink to="/products" onClick={() => setMobileOpen(false)} className="py-3 text-sm font-black uppercase tracking-widest text-gray-300 border-b border-white/5">Products</NavLink>
+            <NavLink to="/solutions" onClick={() => setMobileOpen(false)} className="py-3 text-sm font-black uppercase tracking-widest text-gray-300 border-b border-white/5">Solutions</NavLink>
             <NavLink to="/technology" onClick={() => setMobileOpen(false)} className="py-3 text-sm font-black uppercase tracking-widest text-gray-300 border-b border-white/5">Technology</NavLink>
             <NavLink to="/company" onClick={() => setMobileOpen(false)} className="py-3 text-sm font-black uppercase tracking-widest text-gray-300 border-b border-white/5">Company</NavLink>
-            <Link to="/company" onClick={() => setMobileOpen(false)} className="mt-3 px-6 py-3 bg-cyanAccent text-[#0A0F1E] font-black uppercase tracking-widest text-xs rounded text-center">Book a Demo</Link>
+            <Link to="/contact" onClick={() => setMobileOpen(false)} className="mt-3 px-6 py-3 bg-cyanAccent text-[#0A0F1E] font-black uppercase tracking-widest text-xs rounded text-center">Book a Demo</Link>
           </motion.div>
         )}
       </AnimatePresence>
@@ -130,9 +137,10 @@ function Footer() {
             <h4 className="text-white font-black mb-4 uppercase tracking-widest text-xs border-b border-white/10 pb-2">Studio</h4>
             <ul className="space-y-3 text-sm">
               <li><Link to="/products" className="text-gray-400 hover:text-cyanAccent transition-colors">Products</Link></li>
+              <li><Link to="/solutions" className="text-gray-400 hover:text-cyanAccent transition-colors">Solutions</Link></li>
               <li><Link to="/technology" className="text-gray-400 hover:text-cyanAccent transition-colors">Technology</Link></li>
               <li><Link to="/company" className="text-gray-400 hover:text-cyanAccent transition-colors">About Us</Link></li>
-              <li><Link to="/company" className="text-gray-400 hover:text-cyanAccent transition-colors">Contact</Link></li>
+              <li><Link to="/contact" className="text-gray-400 hover:text-cyanAccent transition-colors">Contact</Link></li>
             </ul>
           </div>
         </div>
@@ -146,31 +154,39 @@ function Footer() {
 }
 
 function App() {
+  const [loaded, setLoaded] = useState(false);
   const location = useLocation();
   return (
-    <div className="relative w-full min-h-screen overflow-x-hidden">
-      <div className="fixed top-0 left-0 w-full h-screen z-0 pointer-events-none">
-        <Background3D currentRoute={location.pathname} />
+    <HelmetProvider>
+      <CustomCursor/>
+      {!loaded && <Preloader onComplete={() => setLoaded(true)}/>}
+      <div className="relative w-full min-h-screen overflow-x-hidden">
+        <div className="fixed top-0 left-0 w-full h-screen z-0 pointer-events-none">
+          <Background3D currentRoute={location.pathname} />
+        </div>
+        <Header />
+        <div className="relative z-10 w-full pt-20 md:pt-24 pointer-events-auto flex flex-col">
+          <main className="flex-grow min-h-screen">
+            <AnimatePresence mode="wait">
+              <Routes location={location} key={location.pathname}>
+                <Route path="/" element={<Home />} />
+                <Route path="/sectors/healthcare" element={<HealthcareSector />} />
+                <Route path="/sectors/architecture" element={<ArchitectureSector />} />
+                <Route path="/sectors/edtech" element={<EdtechSector />} />
+                <Route path="/sectors/legaltech" element={<LegaltechSector />} />
+                <Route path="/products" element={<Products />} />
+                <Route path="/solutions" element={<Solutions />} />
+                <Route path="/technology" element={<Technology />} />
+                <Route path="/company" element={<Company />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </AnimatePresence>
+          </main>
+          <Footer />
+        </div>
       </div>
-      <Header />
-      <div className="relative z-10 w-full pt-20 md:pt-24 pointer-events-auto flex flex-col">
-        <main className="flex-grow min-h-screen">
-          <AnimatePresence mode="wait">
-            <Routes location={location} key={location.pathname}>
-              <Route path="/" element={<Home />} />
-              <Route path="/sectors/healthcare" element={<HealthcareSector />} />
-              <Route path="/sectors/architecture" element={<ArchitectureSector />} />
-              <Route path="/sectors/edtech" element={<EdtechSector />} />
-              <Route path="/sectors/legaltech" element={<LegaltechSector />} />
-              <Route path="/products" element={<Products />} />
-              <Route path="/technology" element={<Technology />} />
-              <Route path="/company" element={<Company />} />
-            </Routes>
-          </AnimatePresence>
-        </main>
-        <Footer />
-      </div>
-    </div>
+    </HelmetProvider>
   );
 }
 

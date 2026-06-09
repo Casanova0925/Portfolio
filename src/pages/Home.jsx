@@ -1,13 +1,28 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useEffect, useRef } from 'react';
+import { motion, useScroll, useSpring } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { TypeAnimation } from 'react-type-animation';
+import CountUp from 'react-countup';
+import { useInView } from 'react-intersection-observer';
 
 const stats = [
-  { value: '60fps', label: 'UI Performance Standard' },
-  { value: '4+', label: 'Industry Verticals' },
-  { value: '99.9%', label: 'Deployment Uptime' },
-  { value: '3', label: 'Platforms: Web · Mobile · Desktop' },
+  { end: 60,   suffix: 'fps', label: 'UI Performance Standard' },
+  { end: 4,    suffix: '+',   label: 'Industry Verticals' },
+  { end: 99.9, suffix: '%',  label: 'Deployment Uptime', decimals: 1 },
+  { end: 3,    suffix: '',   label: 'Platforms: Web · Mobile · Desktop' },
 ];
+
+function StatCard({ stat, delay }) {
+  const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.3 });
+  return (
+    <motion.div ref={ref} initial={{ opacity:0, y:30 }} animate={inView?{opacity:1,y:0}:{}} transition={{ delay, duration:0.6 }}>
+      <p className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-2 glow-text">
+        {inView ? <CountUp end={stat.end} suffix={stat.suffix} decimals={stat.decimals||0} duration={1.8}/> : '0'}
+      </p>
+      <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">{stat.label}</p>
+    </motion.div>
+  );
+}
 
 const capabilities = [
   { icon: '◈', title: 'Web Applications', desc: 'Production-grade web apps built on React, Next.js, and Node.js — from internal dashboards to customer-facing platforms with real-time data layers.' },
@@ -31,8 +46,13 @@ const process = [
 ];
 
 export default function Home() {
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, { stiffness: 120, damping: 28 });
+
   return (
     <div className="w-full">
+      {/* Scroll progress bar */}
+      <motion.div className="scroll-progress" style={{ scaleX }}/>
 
       {/* ── HERO ── */}
       <section className="min-h-screen flex items-center px-4 sm:px-8 md:px-14 lg:px-20">
@@ -47,8 +67,13 @@ export default function Home() {
             initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.1 }}
             className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black leading-[1.05] mb-6 md:mb-8 tracking-tight"
           >
-            We Engineer Software That&nbsp;
-            <span className="glow-text text-cyanAccent">Looks Impossible.</span>
+            We Build Software That&nbsp;
+            <span className="glow-text text-cyanAccent">
+              <TypeAnimation
+                sequence={['Looks Impossible.', 2500, 'Changes Industries.', 2500, 'Sets New Standards.', 2500, 'Drives Growth.', 2500]}
+                wrapper="span" speed={45} repeat={Infinity}
+              />
+            </span>
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }}
@@ -73,15 +98,7 @@ export default function Home() {
       {/* ── STATS BAR ── */}
       <section className="px-4 sm:px-8 md:px-14 lg:px-20 py-10 md:py-16 border-y border-white/5">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-10">
-          {stats.map((s, i) => (
-            <motion.div key={i}
-              initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }} transition={{ delay: i * 0.1, duration: 0.6 }}
-            >
-              <p className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-2 glow-text">{s.value}</p>
-              <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">{s.label}</p>
-            </motion.div>
-          ))}
+          {stats.map((s, i) => <StatCard key={i} stat={s} delay={i*0.1}/>)}
         </div>
       </section>
 
